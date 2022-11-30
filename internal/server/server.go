@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/krls08/go-web-app-sessions/internal/authz"
 	"github.com/krls08/go-web-app-sessions/internal/handlers"
 )
 
@@ -52,7 +53,8 @@ func (s *Server) registerRoutes() http.Handler {
 	mux := chi.NewRouter()
 
 	mux.Use(middleware.Recoverer)
-	//mux.Use(authz.WritetoConsole)
+	mux.Use(authz.WritetoConsole)
+	mux.Use(authz.NoSrurf)
 
 	mux.Get("/", s.h.Home)
 	mux.Get("/about", s.h.About)
