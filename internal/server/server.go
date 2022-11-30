@@ -6,16 +6,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bmizerany/pat"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/krls08/go-web-app-sessions/internal/handlers"
 )
 
 type Server struct {
 	httpAddr string
-	mux      *pat.PatternServeMux
+	mux      http.Handler
 	h        *handlers.HandlerRepo
 
-	//mux      http.Handler
+	//mux      *pat.PatternServeMux
 	//mux      *http.ServeMux
 }
 
@@ -43,10 +44,18 @@ func (s *Server) Run(ctx context.Context) error {
 	return http.ListenAndServe(s.httpAddr, s.mux)
 }
 
-func (s *Server) registerRoutes() *pat.PatternServeMux {
-	mux := pat.New()
-	mux.Get("/", http.HandlerFunc(s.h.Home))
-	mux.Get("/about", http.HandlerFunc(s.h.About))
+func (s *Server) registerRoutes() http.Handler {
+	//mux := pat.New()
+	//mux.Get("/", http.HandlerFunc(s.h.Home))
+	//mux.Get("/about", http.HandlerFunc(s.h.About))
+	//return mux
+	mux := chi.NewRouter()
+
+	mux.Use(middleware.Recoverer)
+	//mux.Use(authz.WritetoConsole)
+
+	mux.Get("/", s.h.Home)
+	mux.Get("/about", s.h.About)
 	return mux
 }
 
