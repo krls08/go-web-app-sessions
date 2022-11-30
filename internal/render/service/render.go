@@ -33,7 +33,6 @@ func NewTemplates(a *config.AppConfig) *tmplService {
 }
 
 func (s *tmplService) RenderTemplate(w http.ResponseWriter, tmpl string, td *domain.TemplateData) {
-	fmt.Println("------------ Render template:", tmpl)
 	var tc map[string]*template.Template
 	if s.app.UseCache {
 		tc = s.app.TemplateCache
@@ -74,7 +73,6 @@ func (s *tmplService) RenderTemplate(w http.ResponseWriter, tmpl string, td *dom
 // CreateTemplateCache creates a template cache as a map
 func (s *tmplService) CreateTemplateCache() (map[string]*template.Template, error) {
 	//myCache := map[string]*template.Template{}
-	fmt.Println("--------- Create template cache")
 	myCache := make(map[string]*template.Template, 0)
 
 	pages, err := filepath.Glob("./templates/*.page.tmpl")

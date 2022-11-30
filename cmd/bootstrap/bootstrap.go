@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/krls08/go-web-app-sessions/cmd/routes"
 	"github.com/krls08/go-web-app-sessions/internal/config"
 	"github.com/krls08/go-web-app-sessions/internal/handlers"
 	render_service "github.com/krls08/go-web-app-sessions/internal/render/service"
@@ -25,10 +24,9 @@ func Run() error {
 	app.TemplateCache = tc
 
 	hr := handlers.NewHanldersRepo(&app, rs)
-	mux := routes.NewRouter(&app, hr)
 
 	ctx := context.TODO()
-	s := server.New(ctx, "localhost", 60002, mux)
+	s := server.NewServer(ctx, "localhost", 60002, hr)
 
 	return s.Run(ctx)
 }
