@@ -8,20 +8,23 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/krls08/go-web-app-sessions/internal/authz"
 	"github.com/krls08/go-web-app-sessions/internal/handlers"
+	mid "github.com/krls08/go-web-app-sessions/internal/middleware"
 )
 
 type Server struct {
 	httpAddr string
 	mux      http.Handler
 	h        *handlers.HandlerRepo
+	ms       mid.MiddlewareService
 
 	//mux      *pat.PatternServeMux
 	//mux      *http.ServeMux
 }
 
-func NewServer(ctx context.Context, host string, port uint, hr *handlers.HandlerRepo) Server { //(context.Context, Server) {
+func NewServer(ctx context.Context, host string, port uint,
+	hr *handlers.HandlerRepo,
+	m mid.MiddlewareService) Server { //(context.Context, Server) {
 	//func New(ctx context.Context, host string, port uint, router http.Handler, hr *handlers.HandlerRepo) Server { //(context.Context, Server) {
 	srv := Server{
 		httpAddr: fmt.Sprintf(host + ":" + fmt.Sprint(port)),
@@ -29,7 +32,8 @@ func NewServer(ctx context.Context, host string, port uint, hr *handlers.Handler
 		//mux: pat.New(),
 
 		// Handlers
-		h: hr,
+		h:  hr,
+		ms: m,
 	}
 
 	//return serverContext(ctx), srv
@@ -45,6 +49,7 @@ func (s *Server) Run(ctx context.Context) error {
 	return http.ListenAndServe(s.httpAddr, s.mux)
 }
 
+// registerRoutes add routes and middlewares
 func (s *Server) registerRoutes() http.Handler {
 	//mux := pat.New()
 	//mux.Get("/", http.HandlerFunc(s.h.Home))
@@ -53,8 +58,9 @@ func (s *Server) registerRoutes() http.Handler {
 	mux := chi.NewRouter()
 
 	mux.Use(middleware.Recoverer)
-	mux.Use(authz.WritetoConsole)
-	mux.Use(authz.NoSrurf)
+	mux.Use(s.ms.WritetoConsole)
+	mux.Use(s.ms.NoSrurf)
+	mux.Use(s.ms.SessionLoad)
 
 	mux.Get("/", s.h.Home)
 	mux.Get("/about", s.h.About)
